@@ -38,7 +38,7 @@ Switch ( $scope )
                 $starttime = get-date $beginrange
                 $endtime = get-date $endrange 
                 foreach ( $log in $logswithentries ) {
-                    $events = get-winevent $log.logname -maxevents $numberofevents | where-object {($_.TimeCreated -ge $starttime -and $_.timecreated -le $endtime)}
+                    $events = get-winevent -computername $targetsystem $log.logname -maxevents $numberofevents | where-object {($_.TimeCreated -ge $starttime -and $_.timecreated -le $endtime)}
                         foreach ( $event in $events ) {
                             Add-EventDetails
                         }
@@ -47,7 +47,7 @@ Switch ( $scope )
         Latest
             {
                 foreach ( $log in $logswithentries ) {
-                    $events = get-winevent $log.logname -maxevents $numberofevents
+                    $events = get-winevent -computername $targetsystem $log.logname -maxevents $numberofevents
                         foreach ( $event in $events ) {
                             Add-EventDetails
                         }
@@ -67,4 +67,4 @@ Switch ( $verbose )
             }
     }
     
-$eventarray | tee-object $runlog -append
+$eventarray | tee-object $logfile -append
