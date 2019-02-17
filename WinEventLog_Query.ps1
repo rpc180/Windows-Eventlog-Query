@@ -59,11 +59,11 @@ Switch ( $verbose )
     {
         True
             {
-                $eventarray = $eventarray | sort-object -property "Timestamp" -Descending | ft -AutoSize -wrap 
+                $eventarray = $eventarray | sort-object -property "Timestamp" -Descending | format-table -AutoSize -wrap 
             }
         False
             {
-                $eventarray = $eventarray | sort-object -property "Timestamp" -Descending | ft 
+                $eventarray = $eventarray | sort-object -property "Timestamp" -Descending | format-table 
             }
     }
     
