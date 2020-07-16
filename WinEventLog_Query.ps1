@@ -1,3 +1,5 @@
+# Test
+
 $startscript = get-date
 $shortdate = get-date -format MM-dd-yy
 $systemrunning = hostname
