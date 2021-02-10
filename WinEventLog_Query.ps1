@@ -16,7 +16,12 @@ $verbose = read-host -prompt "Enter verbose mode (True) or (False)"
 $numberofevents = read-host -prompt "Enter maximum events per log to return"
 
 $eventarray = @()
-$logswithentries = get-winevent -computername $targetsystem -listlog * | where-object { $_.recordcount -gt 0 }
+if ( $targetsystem -eq $null ) {
+    $logswithentries = get-winevent -listlog * | where-object { $_.recordcount -gt 0 }
+}
+else {
+    $logswithentries = get-winevent -computername $targetsystem -listlog * | where-object { $_.recordcount -gt 0 }
+}
 
 Function Add-EventDetails {
     $eventconvert = [xml]$event.toxml()
@@ -38,20 +43,34 @@ Switch ( $scope )
                 $starttime = get-date $beginrange
                 $endtime = get-date $endrange 
                 foreach ( $log in $logswithentries ) {
-                    $events = get-winevent -computername $targetsystem $log.logname -maxevents $numberofevents | where-object {($_.TimeCreated -ge $starttime -and $_.timecreated -le $endtime)}
+                    if ( $targetsystem -eq $null ) {
+                        $events = get-winevent $log.logname -maxevents $numberofevents | where-object {($_.TimeCreated -ge $starttime -and $_.timecreated -le $endtime)}
                         foreach ( $event in $events ) {
                             Add-EventDetails
                         }
+                    }
+                    else {
+                        $events = get-winevent -computername $targetsystem $log.logname -maxevents $numberofevents | where-object {($_.TimeCreated -ge $starttime -and $_.timecreated -le $endtime)}
+                        foreach ( $event in $events ) {
+                            Add-EventDetails
+                        }
+                    }
                 }
             }
         Latest
             {
                 foreach ( $log in $logswithentries ) {
+                    if ( $targetsystem -eq $null ) {
+                    $events = get-winevent $log.logname -maxevents $numberofevents
+                    foreach ( $event in $events ) {
+                        Add-EventDetails
+                    }
+                    }
+                    else {
                     $events = get-winevent -computername $targetsystem $log.logname -maxevents $numberofevents
-                        foreach ( $event in $events ) {
-                            Add-EventDetails
-                        }
-                }
+                    foreach ( $event in $events ) {
+                        Add-EventDetails
+                    }
             }
     }                           
 
