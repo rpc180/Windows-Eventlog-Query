@@ -10,7 +10,7 @@ Write-output "This script is executing on $systemrunning" | Tee-Object -filepath
 Write-output "in directory $runpath"
 add-content $logfile "`r"
 
-$targetsystem = read-host -prompt "ENTER target computername as FQDN"
+$targetsystem = read-host -prompt "ENTER target computername as FQDN (blank for currentsystem)"
 $scope = read-host -prompt "(Time) based results or (Latest) entries"
 $verbose = read-host -prompt "Enter verbose mode (True) or (False)"
 $numberofevents = read-host -prompt "Enter maximum events per log to return"
