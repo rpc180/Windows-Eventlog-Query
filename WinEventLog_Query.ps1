@@ -16,11 +16,11 @@ $verbose = read-host -prompt "Enter verbose mode (True) or (False)"
 $numberofevents = read-host -prompt "Enter maximum events per log to return"
 
 $eventarray = @()
-if ( $targetsystem -eq $null ) {
-    $logswithentries = get-winevent -listlog * | where-object { $_.recordcount -gt 0 }
+if ( $targetsystem ) {
+    $logswithentries = get-winevent -computername $targetsystem -listlog * | where-object { $_.recordcount -gt 0 }
 }
 else {
-    $logswithentries = get-winevent -computername $targetsystem -listlog * | where-object { $_.recordcount -gt 0 }
+    $logswithentries = get-winevent -listlog * | where-object { $_.recordcount -gt 0 }
 }
 
 Function Add-EventDetails {
@@ -38,19 +38,17 @@ Switch ( $scope )
     {
         Time
             {
-                $beginrange = read-host -prompt "Enter initial date/time in format '11/2/2018 10:32am'"
-                $endrange = read-host -prompt "Enter end date/time"
-                $starttime = get-date $beginrange
-                $endtime = get-date $endrange 
+                $starttime = read-host -prompt "Enter initial date/time in format '11/2/2018 10:32am'" | Get-Date
+                $endtime = read-host -prompt "Enter end date/time" | get-date
                 foreach ( $log in $logswithentries ) {
-                    if ( $targetsystem -eq $null ) {
-                        $events = get-winevent $log.logname -maxevents $numberofevents | where-object {($_.TimeCreated -ge $starttime -and $_.timecreated -le $endtime)}
-                        foreach ( $event in $events ) {
-                            Add-EventDetails
-                        }
+                    if ( $targetsystem ) {
+                        $events = get-winevent -computername $targetsystem $log.logname -maxevents $numberofevents | where-object {($_.TimeCreated -ge $starttime -and $_.timecreated -le $endtime)}
+                            foreach ( $event in $events ) {
+                                Add-EventDetails
+                            }
                     }
                     else {
-                        $events = get-winevent -computername $targetsystem $log.logname -maxevents $numberofevents | where-object {($_.TimeCreated -ge $starttime -and $_.timecreated -le $endtime)}
+                        $events = get-winevent $log.logname -maxevents $numberofevents | where-object {($_.TimeCreated -ge $starttime -and $_.timecreated -le $endtime)}
                         foreach ( $event in $events ) {
                             Add-EventDetails
                         }
@@ -60,19 +58,21 @@ Switch ( $scope )
         Latest
             {
                 foreach ( $log in $logswithentries ) {
-                    if ( $targetsystem -eq $null ) {
-                    $events = get-winevent $log.logname -maxevents $numberofevents
-                    foreach ( $event in $events ) {
-                        Add-EventDetails
-                    }
+                    if ( $targetsystem ) {
+                        $events = get-winevent -computername $targetsystem $log.logname -maxevents $numberofevents
+                        foreach ( $event in $events ) {
+                            Add-EventDetails
+                            }
                     }
                     else {
-                    $events = get-winevent -computername $targetsystem $log.logname -maxevents $numberofevents
-                    foreach ( $event in $events ) {
-                        Add-EventDetails
+                        $events = get-winevent $log.logname -maxevents $numberofevents
+                        foreach ( $event in $events ) {
+                            Add-EventDetails
+                            }
                     }
+                }
             }
-    }                           
+        }
 
 Switch ( $verbose )
     {
