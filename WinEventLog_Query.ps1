@@ -13,7 +13,6 @@ add-content $logfile "`r"
 $targetsystem = read-host -prompt "ENTER target computername as FQDN (blank for currentsystem)"
 $scope = read-host -prompt "(Time) based results or (Latest) entries"
 $verbose = read-host -prompt "Enter verbose mode (True) or (False)"
-$numberofevents = read-host -prompt "Enter maximum events per log to return"
 
 $eventarray = @()
 if ( $targetsystem ) {
@@ -42,13 +41,13 @@ Switch ( $scope )
                 $endtime = read-host -prompt "Enter end date/time" | get-date
                 foreach ( $log in $logswithentries ) {
                     if ( $targetsystem ) {
-                        $events = get-winevent -computername $targetsystem $log.logname -maxevents $numberofevents | where-object {($_.TimeCreated -ge $starttime -and $_.timecreated -le $endtime)}
+                        $events = get-winevent -computername $targetsystem -FilterHashtable @{ LogName=$log.logname; StartTime=$starttime; EndTime=$endtime } -ErrorAction SilentlyContinue
                             foreach ( $event in $events ) {
                                 Add-EventDetails
                             }
                     }
                     else {
-                        $events = get-winevent $log.logname -maxevents $numberofevents | where-object {($_.TimeCreated -ge $starttime -and $_.timecreated -le $endtime)}
+                        $events = get-winevent -FilterHashtable @{ LogName=$log.logname; StartTime=$starttime; EndTime=$endtime } -ErrorAction SilentlyContinue
                         foreach ( $event in $events ) {
                             Add-EventDetails
                         }
@@ -57,6 +56,7 @@ Switch ( $scope )
             }
         Latest
             {
+                $numberofevents = read-host -prompt "Enter maximum events per log to return"
                 foreach ( $log in $logswithentries ) {
                     if ( $targetsystem ) {
                         $events = get-winevent -computername $targetsystem $log.logname -maxevents $numberofevents
